@@ -83,6 +83,215 @@ if ( ! function_exists( 'mms_setup' ) ) :
 endif;
 add_action( 'after_setup_theme', 'mms_setup' );
 
+function mms_post_type() {
+	register_post_type( 'events',
+		array(
+			'labels' => array(
+				'name'          => __( 'Events' ),
+				'singular_name' => __( 'Event' ),
+				'menu_name'     => __( 'Events' ),
+				'name_admin_bar'=> __( 'Event' ),
+				'add_new'       => __( 'Add New'),
+				'add_new_item'  => __( 'Add New Event'),
+				'new_item'      => __( 'New Event' ),
+				'edit_item'     => __( 'Edit Event' ),
+				'view_item'     => __( 'View Event' ),
+				'all_items'     => __( 'All Events' ),
+				'search_items'  => __( 'Search Events' ),
+				'not_found'     => __( 'No Events found' )
+			),
+			'public'            => true,
+			'publicly_queryable'=> true,
+			'has_archive'       => false,
+			'show_ui'           => true,
+			'menu_position'     => 5,
+			'menu_icon'         => 'dashicons-calendar-alt',
+			'query_var'         => true,
+			'capability_type'   => 'post',
+			'hierarchical'      => false,
+			'taxonomies'        => array('category'),
+			'supports'          => array('title', 'thumbnail'),
+			'show_in_rest'      => true
+		)
+	);
+	$post_type = 'events';
+	remove_post_type_support($post_type, 'editor');
+}
+add_action( 'init', 'mms_post_type' );
+/*
+ * Adding in a custom Function to call in the Events post type
+ *
+ * */
+function mms($query){
+	if (!is_admin() && $query->is_main_query() ){
+		if ($query->is_home() ){
+			$query->set('post_type', 'events');
+		}
+	}
+}
+add_action( 'pre_get_posts', 'mms');
+
+/*
+ * Including ACF inline and lite mode so the plugin is not a visible part of the site.
+ * Creating a Custom field group that cannot be edited by the end user using Advanced Custom fields (acf)
+ *
+*/
+//
+//define( 'ACF_LITE', true );
+//include_once('advanced-custom-fields/acf.php');
+//
+//if(function_exists("register_field_group"))
+//{
+//	register_field_group(array (
+//		'id' => 'acf_events',
+//		'title' => 'Events',
+//		'fields' => array (
+//			array (
+//				'key' => 'field_5a8472cdd07ae',
+//				'label' => 'Multi Day Event',
+//				'name' => 'multi_day_event',
+//				'type' => 'radio',
+//				'instructions' => 'Does the event last longer than a day?',
+//				'required' => 1,
+//				'choices' => array (
+//					'yes' => 'Yes',
+//					'no' => 'No',
+//				),
+//				'other_choice' => 0,
+//				'save_other_choice' => 0,
+//				'default_value' => 'no',
+//				'layout' => 'vertical',
+//			),
+//			array (
+//				'key' => 'field_5a846fa89f757',
+//				'label' => 'Event Date',
+//				'name' => 'single_event_date',
+//				'type' => 'date_picker',
+//				'instructions' => 'What day does the event take place?',
+//				'required' => 1,
+//				'conditional_logic' => array (
+//					'status' => 1,
+//					'rules' => array (
+//						array (
+//							'field' => 'field_5a8472cdd07ae',
+//							'operator' => '==',
+//							'value' => 'no',
+//						),
+//					),
+//					'allorany' => 'all',
+//				),
+//				'date_format' => 'yymmdd',
+//				'display_format' => 'mm/dd/yy',
+//				'first_day' => 1,
+//			),
+//			array (
+//				'key' => 'field_5a84747a1959a',
+//				'label' => 'Event Start Date',
+//				'name' => 'event_start_date',
+//				'type' => 'date_picker',
+//				'instructions' => 'What day does the event start?',
+//				'required' => 1,
+//				'conditional_logic' => array (
+//					'status' => 1,
+//					'rules' => array (
+//						array (
+//							'field' => 'field_5a8472cdd07ae',
+//							'operator' => '==',
+//							'value' => 'yes',
+//						),
+//					),
+//					'allorany' => 'all',
+//				),
+//				'date_format' => 'yymmdd',
+//				'display_format' => 'mm/dd/yy',
+//				'first_day' => 1,
+//			),
+//			array (
+//				'key' => 'field_5a84747919599',
+//				'label' => 'Event End Date',
+//				'name' => 'event_end_date',
+//				'type' => 'date_picker',
+//				'instructions' => 'What day does the event end?',
+//				'required' => 1,
+//				'conditional_logic' => array (
+//					'status' => 1,
+//					'rules' => array (
+//						array (
+//							'field' => 'field_5a8472cdd07ae',
+//							'operator' => '==',
+//							'value' => 'yes',
+//						),
+//					),
+//					'allorany' => 'all',
+//				),
+//				'date_format' => 'yymmdd',
+//				'display_format' => 'mm/dd/yy',
+//				'first_day' => 1,
+//			),
+//			array (
+//				'key' => 'field_5a84702e9f758',
+//				'label' => 'Event Location',
+//				'name' => 'event_location',
+//				'type' => 'textarea',
+//				'instructions' => 'Where will this event take place.',
+//				'required' => 1,
+//				'default_value' => '',
+//				'placeholder' => '',
+//				'maxlength' => '',
+//				'rows' => '',
+//				'formatting' => 'br',
+//			),
+//			array (
+//				'key' => 'field_5a8469839f756',
+//				'label' => 'General Description',
+//				'name' => 'general_description',
+//				'type' => 'textarea',
+//				'instructions' => 'General Description of Event',
+//				'required' => 1,
+//				'default_value' => '',
+//				'placeholder' => '',
+//				'maxlength' => '',
+//				'rows' => '',
+//				'formatting' => 'br',
+//			),
+//			array (
+//				'key' => 'field_5a84706e9f759',
+//				'label' => 'Event Registration',
+//				'name' => 'event_registration',
+//				'type' => 'textarea',
+//				'instructions' => 'Information on how to register for the event.',
+//				'default_value' => '',
+//				'placeholder' => '',
+//				'maxlength' => '',
+//				'rows' => '',
+//				'formatting' => 'br',
+//			),
+//		),
+//		'location' => array (
+//			array (
+//				array (
+//					'param' => 'post_type',
+//					'operator' => '==',
+//					'value' => 'events',
+//					'order_no' => 0,
+//					'group_no' => 0,
+//				),
+//			),
+//		),
+//		'options' => array (
+//			'position' => 'acf_after_title',
+//			'layout' => 'default',
+//			'hide_on_screen' => array (
+//				0 => 'slug',
+//			),
+//		),
+//		'menu_order' => 0,
+//	));
+//}
+//
+
+
+
 /**
  * Set the content width in pixels, based on the theme's design and stylesheet.
  *
@@ -100,6 +309,9 @@ add_action( 'after_setup_theme', 'mms_content_width', 0 );
  *
  * @link https://developer.wordpress.org/themes/functionality/sidebars/#registering-a-sidebar
  */
+
+
+
 function mms_widgets_init() {
 	register_sidebar( array(
 		'name'          => esc_html__( 'Sidebar', 'mms' ),
